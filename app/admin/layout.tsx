@@ -1,6 +1,12 @@
 import { AppSidebar } from "@/components/sidebar/app-sidebar";
 import { SiteHeader } from "@/components/sidebar/site-header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "LearnMate | Admin Dashboard",
+  description: "Admin dashboard for LearnMate application",
+};
 
 export default function AdminLayout({
   children,
