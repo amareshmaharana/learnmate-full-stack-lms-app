@@ -5,8 +5,6 @@ import { v4 as uuidv4 } from "uuid";
 import { env } from "@/lib/env";
 import { S3 } from "@/lib/S3Client";
 
-export const runtime = "nodejs";
-
 export async function POST(request: Request) {
   try {
     const contentType = request.headers.get("content-type") || "";
@@ -30,7 +28,7 @@ export async function POST(request: Request) {
     const body = Buffer.from(arrayBuffer);
 
     const command = new PutObjectCommand({
-      Bucket: env.NEXT_PUBLIC_S3_BUCKET_NAME_IMAGES,
+      Bucket: env.NEXT_PUBLIC_S3_BUCKET_NAME_IMAGES!,
       Key: key,
       Body: body,
       ContentType: file.type,
@@ -46,7 +44,7 @@ export async function POST(request: Request) {
       { status: 201 }
     );
   } catch (error) {
-    console.error("Direct S3 upload error:", error);
+    console.log("Direct S3 upload error:", error);
     return NextResponse.json(
       {
         error: "Failed to upload file",
