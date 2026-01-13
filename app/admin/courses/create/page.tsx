@@ -187,8 +187,7 @@ export default function CoursesCreationPage() {
                       Thumbnail Image
                     </FormLabel>
                     <FormControl className="rounded-md border border-input px-3 py-2 focus:outline-none focus:ring-1 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
-                      <Uploader />
-                      {/* <Input placeholder="Thumbnail Url" {...field} /> */}
+                      <Uploader value={field.value} onChange={field.onChange} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
