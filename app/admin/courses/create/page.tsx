@@ -48,8 +48,9 @@ export default function CoursesCreationPage() {
       title: "",
       description: "",
       fileKey: "",
-      price: 0,
-      duration: 0,
+      // FIX: Use undefined so the input starts empty
+      price: undefined,
+      duration: undefined,
       level: "Beginner",
       category: "It & Software",
       smallDescription: "",
@@ -264,7 +265,7 @@ export default function CoursesCreationPage() {
                       <FormLabel className="font-bold text-lg">
                         Duration (in hours)
                       </FormLabel>
-                      <FormControl className="rounded-md border border-input px-3 py-2 focus:outline-none focus:ring-1 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
+                      <FormControl className="...">
                         <Input
                           placeholder="Duration"
                           type="number"
