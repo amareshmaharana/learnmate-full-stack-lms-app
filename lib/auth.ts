@@ -1,8 +1,6 @@
-import "server-only";
-
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
-import { emailOTP } from "better-auth/plugins";
+import { emailOTP, admin } from "better-auth/plugins";
 
 import { prisma } from "./db";
 import { env } from "./env";
@@ -21,7 +19,7 @@ export const auth = betterAuth({
   plugins: [
     emailOTP({
       async sendVerificationOTP({ email, otp }) {
-        const { data, error } = await resend.emails.send({
+        await resend.emails.send({
           from: "LearnMate <onboarding@resend.dev>",
           to: [email],
           subject: "LearnMate - Verify your email",
@@ -34,5 +32,6 @@ export const auth = betterAuth({
         });
       },
     }),
+    admin()
   ],
 });
