@@ -2,7 +2,12 @@ import { buttonVariants } from "@/components/ui/button";
 import { IconCirclePlus } from "@tabler/icons-react";
 import Link from "next/link";
 
-export default function CoursesPage() {
+import { adminGetCourses } from "@/app/data/admin/admin-get-courses";
+import { AdminCourseCard } from "./_components/AdminCourseCard";
+
+export default async function CoursesPage() {
+  const data = await adminGetCourses();
+
   return (
     <>
       <div className="flex items-center justify-between">
@@ -15,7 +20,11 @@ export default function CoursesPage() {
       </div>
 
       <div>
-        <h1>All Courses</h1>
+        {/* <h1>All Courses</h1> */}
+
+        {data.map((course) => (
+          <AdminCourseCard key={course.id} data={course} />
+        ))}
       </div>
     </>
   );
