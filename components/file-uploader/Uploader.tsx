@@ -13,6 +13,7 @@ import {
   RenderUploadingState,
   RenderUploadState,
 } from "./RenderState";
+import { useConstructUrl } from "@/hooks/use-construct-url";
 
 interface UploaderState {
   id: string | null;
@@ -32,6 +33,7 @@ interface iAppProps {
 }
 
 export function Uploader({ onChange, value }: iAppProps) {
+  const fileUrl = useConstructUrl(value || "");
   const [fileState, setFileState] = useState<UploaderState>({
     error: false,
     file: null,
@@ -41,6 +43,7 @@ export function Uploader({ onChange, value }: iAppProps) {
     fileType: "image",
     isDeleting: false,
     key: value,
+    objectUrl: fileUrl || undefined,
   });
 
   async function uploadFile(file: File) {
