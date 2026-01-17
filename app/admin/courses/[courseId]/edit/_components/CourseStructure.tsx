@@ -32,6 +32,7 @@ import {
   ChevronRight,
   FileText,
   GripVertical,
+  PlusIcon,
   Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -225,7 +226,8 @@ export function CourseStructure({ data }: iAppProps) {
 
                             <div className="p-2">
                               <Button variant="outline" className="w-full">
-                                Create a Lesson
+                                <PlusIcon className="size-4" />
+                                New Lesson
                               </Button>
                             </div>
                           </div>
