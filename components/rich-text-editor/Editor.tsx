@@ -14,20 +14,27 @@ export function RichTextEditor({ field }: { field: any }) {
       TextAlign.configure({ types: ["heading", "paragraph"] }),
     ],
     immediatelyRender: false,
-
     editorProps: {
       attributes: {
         class:
           "min-h-[200px] p-4 focus:outline-none prose prose-sm sm:prose lg:prose-lg xl:prose-xl dark:prose-invert !max-w-none !w-full",
       },
     },
-
     onUpdate: ({ editor }) => {
+      // Keep saving as JSON string
       field.onChange(JSON.stringify(editor.getJSON()));
     },
-
     content: field.value
-      ? JSON.parse(field.value)
+      ? (() => {
+          try {
+            // Try to parse as JSON first
+            return JSON.parse(field.value);
+          } catch {
+            // If it fails (syntax error), return the plain text string
+            // Tiptap can handle plain text automatically
+            return field.value;
+          }
+        })()
       : { type: "doc", content: [] },
   });
 
