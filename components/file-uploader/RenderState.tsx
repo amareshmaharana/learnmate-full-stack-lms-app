@@ -1,4 +1,4 @@
-import { CloudUploadIcon, ImageIcon, Loader2, XIcon } from "lucide-react";
+import { CloudUploadIcon, ImageIcon, Loader2, TrashIcon } from "lucide-react";
 import Image from "next/image";
 
 import { cn } from "@/lib/utils";
@@ -11,7 +11,7 @@ export function RenderEmptyState({ isDragActive }: { isDragActive: boolean }) {
         <CloudUploadIcon
           className={cn(
             "size-6",
-            isDragActive && "text-primary animate-bounce"
+            isDragActive && "text-primary animate-bounce",
           )}
         />
       </div>
@@ -51,19 +51,25 @@ export function RenderUploadState({
   previewUrl,
   isDeleting,
   handleRemoveFile,
+  fileType,
 }: {
   previewUrl: string;
   isDeleting: boolean;
   handleRemoveFile?: () => void;
+  fileType?: "image" | "video";
 }) {
   return (
-    <div>
-      <Image
-        src={previewUrl}
-        alt="uploaded-file"
-        fill
-        className="object-contain p-2"
-      />
+    <div className="relative group w-140 h-48 flex items-center justify-center">
+      {fileType === "video" ? (
+        <video src={previewUrl} controls className="rounded-md w-full h-full" />
+      ) : (
+        <Image
+          src={previewUrl}
+          alt="uploaded-file"
+          fill
+          className="object-contain p-2"
+        />
+      )}
 
       <Button
         variant="destructive"
@@ -75,7 +81,7 @@ export function RenderUploadState({
         {isDeleting ? (
           <Loader2 className="size-4 animate-spin" />
         ) : (
-          <XIcon className="size-4" />
+          <TrashIcon className="size-4" />
         )}
       </Button>
     </div>
