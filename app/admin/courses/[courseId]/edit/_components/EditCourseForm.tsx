@@ -9,7 +9,7 @@ import {
   courseStatus,
 } from "@/lib/zodSchemas";
 import { Loader2, PencilIcon, SparkleIcon } from "lucide-react";
-import { useForm } from "react-hook-form";
+import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Form,
@@ -33,7 +33,6 @@ import { RichTextEditor } from "@/components/rich-text-editor/Editor";
 import { Uploader } from "@/components/file-uploader/Uploader";
 import { useTransition } from "react";
 import { tryCatch } from "@/hooks/try-catch";
-// import { CreateCourse } from "./actions";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { editCourse } from "../actions";
@@ -49,14 +48,13 @@ export function EditCourseForm({ data }: iAppProps) {
 
   // 1. Define your form.
   const form = useForm<CourseSchemaType>({
-    resolver: zodResolver(courseSchema),
+    resolver: zodResolver(courseSchema) as Resolver<CourseSchemaType>,
     defaultValues: {
       title: data.title,
       description: data.description,
       fileKey: data.fileKey,
-      // FIX: Use undefined so the input starts empty
-      price: data.price ?? undefined,
-      duration: data.duration ?? undefined,
+      price: data.price || undefined,
+      duration: data.duration || undefined,
       level: data.level,
       category: data.category as CourseSchemaType["category"],
       smallDescription: data.smallDescription,
@@ -150,7 +148,7 @@ export function EditCourseForm({ data }: iAppProps) {
               <FormControl className="rounded-md border border-input px-3 py-2 focus:outline-none focus:ring-1 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
                 <Textarea
                   placeholder="Short description"
-                  className="min-h-[50px]"
+                  className="min-h-12.5"
                   {...field}
                 />
               </FormControl>
