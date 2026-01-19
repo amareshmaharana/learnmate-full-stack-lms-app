@@ -17,7 +17,7 @@ import {
 } from "@/lib/zodSchemas";
 import { ArrowLeft, Loader2, PlusCircleIcon, SparkleIcon } from "lucide-react";
 import Link from "next/link";
-import { useForm } from "react-hook-form";
+import { type Resolver, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Form,
@@ -51,12 +51,11 @@ export default function CoursesCreationPage() {
 
   // 1. Define your form.
   const form = useForm<CourseSchemaType>({
-    resolver: zodResolver(courseSchema),
+    resolver: zodResolver(courseSchema) as Resolver<CourseSchemaType>,
     defaultValues: {
       title: "",
       description: "",
       fileKey: "",
-      // FIX: Use undefined so the input starts empty
       price: undefined,
       duration: undefined,
       level: "Beginner",
@@ -174,7 +173,7 @@ export default function CoursesCreationPage() {
                     <FormControl className="rounded-md border border-input px-3 py-2 focus:outline-none focus:ring-1 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
                       <Textarea
                         placeholder="Short description"
-                        className="min-h-[50px]"
+                        className="min-h-12.5"
                         {...field}
                       />
                     </FormControl>
@@ -210,7 +209,11 @@ export default function CoursesCreationPage() {
                       Thumbnail Image
                     </FormLabel>
                     <FormControl className="rounded-md border border-input px-3 py-2 focus:outline-none focus:ring-1 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
-                      <Uploader fileTypeAccepted="image" value={field.value} onChange={field.onChange} />
+                      <Uploader
+                        fileTypeAccepted="image"
+                        value={field.value}
+                        onChange={field.onChange}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
