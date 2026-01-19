@@ -30,9 +30,10 @@ interface UploaderState {
 interface iAppProps {
   value?: string;
   onChange?: (value: string) => void;
+  fileTypeAccepted: "image" | "video";
 }
 
-export function Uploader({ onChange, value }: iAppProps) {
+export function Uploader({ onChange, value, fileTypeAccepted }: iAppProps) {
   const fileUrl = useConstructUrl(value || "");
   const [fileState, setFileState] = useState<UploaderState>({
     error: false,
@@ -40,95 +41,95 @@ export function Uploader({ onChange, value }: iAppProps) {
     id: null,
     progress: 0,
     uploading: false,
-    fileType: "image",
+    fileType: fileTypeAccepted,
     isDeleting: false,
     key: value,
-    objectUrl: fileUrl || undefined,
+    objectUrl: value ? fileUrl : undefined,
   });
 
-  async function uploadFile(file: File) {
-    setFileState((prev) => ({ ...prev, uploading: true, progress: 0 }));
+  const uploadFile = useCallback(
+    async (file: File) => {
+      setFileState((prev) => ({ ...prev, uploading: true, progress: 0 }));
 
-    try {
-      // 1. Get presigned URL
-      const presignedResponse = await fetch("/api/s3/upload", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          fileName: file.name,
-          contentType: file.type,
-          size: file.size,
-          isImage: true,
-        }),
-      });
+      try {
+        // 1. Get presigned URL
+        const presignedResponse = await fetch("/api/s3/upload", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            fileName: file.name,
+            contentType: file.type,
+            size: file.size,
+            isImage: fileTypeAccepted === "image" ? true : false,
+          }),
+        });
 
-      if (!presignedResponse.ok) {
-        toast.error("Failed to get presigned URL");
+        if (!presignedResponse.ok) {
+          toast.error("Failed to get presigned URL");
+          setFileState((prev) => ({
+            ...prev,
+            uploading: false, // Fix: set uploading to false on error
+            error: true,
+          }));
+          return;
+        }
+
+        const { presignedUrl, key } = await presignedResponse.json();
+
+        // 2. Upload DIRECTLY to Tigris/S3 (Bypassing Next.js Server)
+        await new Promise<void>((resolve, reject) => {
+          const xhr = new XMLHttpRequest();
+
+          xhr.upload.onprogress = (event) => {
+            if (event.lengthComputable) {
+              const percentageCompleted = (event.loaded / event.total) * 100;
+              setFileState((prev) => ({
+                ...prev,
+                progress: Math.round(percentageCompleted),
+              }));
+            }
+          };
+
+          xhr.onload = () => {
+            if (xhr.status >= 200 && xhr.status < 300) {
+              setFileState((prev) => ({
+                ...prev,
+                progress: 100,
+                uploading: false,
+                key: key,
+              }));
+
+              onChange?.(key);
+              toast.success("File uploaded successfully");
+              resolve();
+            } else {
+              reject(new Error("Upload failed"));
+            }
+          };
+
+          xhr.onerror = () => {
+            reject(new Error("Upload error"));
+          };
+
+          xhr.open("PUT", presignedUrl);
+          xhr.setRequestHeader("Content-Type", file.type);
+          xhr.send(file);
+        });
+      } catch (err) {
+        console.error(err);
+        toast.error("Something went wrong during the upload.");
         setFileState((prev) => ({
           ...prev,
-          uploading: false, // Fix: set uploading to false on error
+          uploading: false,
+          progress: 0,
           error: true,
         }));
-        return;
       }
-
-      const { presignedUrl, key } = await presignedResponse.json();
-
-      // 2. Upload DIRECTLY to Tigris/S3 (Bypassing Next.js Server)
-      await new Promise<void>((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-
-        xhr.upload.onprogress = (event) => {
-          if (event.lengthComputable) {
-            const percentageCompleted = (event.loaded / event.total) * 100;
-            setFileState((prev) => ({
-              ...prev,
-              progress: Math.round(percentageCompleted),
-            }));
-          }
-        };
-
-        xhr.onload = () => {
-          // S3 returns 200 or 204 on success
-          if (xhr.status >= 200 && xhr.status < 300) {
-            setFileState((prev) => ({
-              ...prev,
-              progress: 100,
-              uploading: false,
-              key: key,
-            }));
-
-            onChange?.(key);
-            toast.success("File uploaded successfully");
-            resolve();
-          } else {
-            reject(new Error("Upload failed"));
-          }
-        };
-
-        xhr.onerror = () => {
-          reject(new Error("Upload error"));
-        };
-
-        // --- THE CRITICAL FIX ---
-        xhr.open("PUT", presignedUrl); // Use the URL we fetched!
-        xhr.setRequestHeader("Content-Type", file.type); // Crucial for S3
-        xhr.send(file); // Send the raw file, not FormData
-      });
-    } catch (err) {
-      console.error(err);
-      toast.error("Something went wrong during the upload.");
-      setFileState((prev) => ({
-        ...prev,
-        uploading: false,
-        progress: 0,
-        error: true,
-      }));
-    }
-  }
+    },
+    [fileTypeAccepted, onChange],
+  );
 
   const onDrop = useCallback(
-    // eslint-disable-next-line react-hooks/preserve-manual-memoization
     (acceptedFiles: File[]) => {
       if (acceptedFiles.length > 0) {
         const file = acceptedFiles[0];
@@ -146,13 +147,13 @@ export function Uploader({ onChange, value }: iAppProps) {
           error: false,
           id: uuidv4(),
           isDeleting: false,
-          fileType: "image",
+          fileType: fileTypeAccepted,
         });
 
         uploadFile(file);
       }
     },
-    [fileState.objectUrl]
+    [fileState.objectUrl, fileTypeAccepted, uploadFile],
   );
 
   async function handleRemoveFile() {
@@ -190,7 +191,7 @@ export function Uploader({ onChange, value }: iAppProps) {
         progress: 0,
         uploading: false,
         objectUrl: undefined,
-        fileType: "image",
+        fileType: fileTypeAccepted,
         isDeleting: false,
       });
 
@@ -208,11 +209,11 @@ export function Uploader({ onChange, value }: iAppProps) {
   function rejectedFiles(fileRejection: FileRejection[]) {
     if (fileRejection.length) {
       const tooManyFiles = fileRejection.find(
-        (rejection) => rejection.errors[0].code === "too-many-files"
+        (rejection) => rejection.errors[0].code === "too-many-files",
       );
 
       const fileSizeToBig = fileRejection.find(
-        (rejection) => rejection.errors[0].code === "file-too-large"
+        (rejection) => rejection.errors[0].code === "file-too-large",
       );
 
       if (fileSizeToBig) {
@@ -245,6 +246,7 @@ export function Uploader({ onChange, value }: iAppProps) {
           handleRemoveFile={handleRemoveFile}
           isDeleting={fileState.isDeleting as boolean}
           previewUrl={fileState.objectUrl}
+          fileType={fileState.fileType}
         />
       );
     }
@@ -262,10 +264,12 @@ export function Uploader({ onChange, value }: iAppProps) {
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
-    accept: { "image/*": [] },
+    accept:
+      fileTypeAccepted === "video" ? { "video/*": [] } : { "image/*": [] },
     maxFiles: 1,
     multiple: false,
-    maxSize: 1 * 1024 * 1024, // 1 MB
+    maxSize:
+      fileTypeAccepted === "image" ? 5 * 1024 * 1024 : 5000 * 1024 * 1024, // 5MB for images, 5GB for videos
     onDropRejected: rejectedFiles,
     disabled: fileState.uploading || !!fileState.objectUrl,
   });
@@ -277,7 +281,7 @@ export function Uploader({ onChange, value }: iAppProps) {
         "relative flex h-52 w-full flex-col items-center justify-center rounded-md border-2 border-dashed border-border bg-background p-4 transition-colors hover:border-primary/70",
         isDragActive
           ? "border-primary bg-primary/10"
-          : "border-border hover:border-primary/70"
+          : "border-border hover:border-primary/70",
       )}
     >
       <CardContent>
