@@ -184,7 +184,7 @@ export function EditCourseForm({ data }: iAppProps) {
                 Thumbnail Image
               </FormLabel>
               <FormControl className="rounded-md border border-input px-3 py-2 focus:outline-none focus:ring-1 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
-                <Uploader value={field.value} onChange={field.onChange} />
+                <Uploader fileTypeAccepted="image" value={field.value} onChange={field.onChange} />
               </FormControl>
               <FormMessage />
             </FormItem>
