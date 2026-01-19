@@ -65,6 +65,9 @@ export function NewLessonModal({
   }
 
   function handleOpenChange(open: boolean) {
+    if (!open) {
+      form.reset();
+    }
     setIsOpen(open);
   }
 
@@ -94,7 +97,7 @@ export function NewLessonModal({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="mb-2">Name</FormLabel>
-                    
+
                     <FormControl>
                       <Input placeholder="Lesson Name" {...field} />
                     </FormControl>
