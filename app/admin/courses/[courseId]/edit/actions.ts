@@ -20,19 +20,19 @@ const aj = arcjet
     detectBot({
       mode: "LIVE",
       allow: [],
-    })
+    }),
   )
   .withRule(
     fixedWindow({
       mode: "LIVE",
       window: "1m",
       max: 5,
-    })
+    }),
   );
 
 export async function editCourse(
   data: CourseSchemaType,
-  courseId: string
+  courseId: string,
 ): Promise<ApiResponse> {
   const user = await requireAdmin();
 
@@ -90,7 +90,7 @@ export async function editCourse(
 export async function reorderLessons(
   chapterId: string,
   lessons: { id: string; position: number }[],
-  courseId: string
+  courseId: string,
 ): Promise<ApiResponse> {
   await requireAdmin();
 
@@ -111,7 +111,7 @@ export async function reorderLessons(
         data: {
           position: lesson.position,
         },
-      })
+      }),
     );
     await prisma.$transaction(updates);
 
@@ -131,7 +131,7 @@ export async function reorderLessons(
 
 export async function reorderChapters(
   courseId: string,
-  chapters: { id: string; position: number }[]
+  chapters: { id: string; position: number }[],
 ): Promise<ApiResponse> {
   await requireAdmin();
 
@@ -152,7 +152,7 @@ export async function reorderChapters(
         data: {
           position: chapter.position,
         },
-      })
+      }),
     );
 
     await prisma.$transaction(updates);
@@ -172,7 +172,7 @@ export async function reorderChapters(
 }
 
 export async function createChapter(
-  values: ChapterSchemaType
+  values: ChapterSchemaType,
 ): Promise<ApiResponse> {
   await requireAdmin();
 
@@ -221,7 +221,7 @@ export async function createChapter(
 }
 
 export async function createLesson(
-  values: LessonSchemaType
+  values: LessonSchemaType,
 ): Promise<ApiResponse> {
   await requireAdmin();
 
@@ -352,6 +352,91 @@ export async function deleteLesson({
     return {
       status: "error",
       message: "Failed at deleting lesson.",
+    };
+  }
+}
+
+export async function deleteChapter({
+  chapterId,
+  courseId,
+}: {
+  chapterId: string;
+  courseId: string;
+}): Promise<ApiResponse> {
+  await requireAdmin();
+
+  try {
+    const courWithChapters = await prisma.course.findUnique({
+      where: {
+        id: courseId,
+      },
+      select: {
+        chapter: {
+          orderBy: {
+            position: "asc",
+          },
+          select: {
+            id: true,
+            position: true,
+          },
+        },
+      },
+    });
+
+    if (!courWithChapters) {
+      return {
+        status: "error",
+        message: "Course not found.",
+      };
+    }
+
+    const chapters = courWithChapters.chapter;
+
+    const chapterToDelete = chapters.find(
+      (chapter) => chapter.id === chapterId,
+    );
+
+    if (!chapterToDelete) {
+      return {
+        status: "error",
+        message: "Chapter not found in the specified course.",
+      };
+    }
+
+    const remainingChapters = chapters.filter(
+      (chapter) => chapter.id !== chapterId,
+    );
+
+    const updates = remainingChapters.map((chapter, index) => {
+      return prisma.chapter.update({
+        where: {
+          id: chapter.id,
+        },
+        data: {
+          position: index + 1,
+        },
+      });
+    });
+
+    await prisma.$transaction([
+      ...updates,
+      prisma.chapter.delete({
+        where: {
+          id: chapterId,
+        },
+      }),
+    ]);
+
+    revalidatePath(`/admin/courses/${courseId}/edit`);
+
+    return {
+      status: "success",
+      message: "Chapter deleted and positions reordered successfully.",
+    };
+  } catch {
+    return {
+      status: "error",
+      message: "Failed at deleting chapter.",
     };
   }
 }
