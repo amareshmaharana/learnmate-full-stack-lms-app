@@ -49,7 +49,7 @@ export default function Home() {
           <h1 className="text-4xl md:text-6xl font-bold tracking-tight">
             Elevate your learning experience
           </h1>
-          <p className="max-w-[700px] text-muted-foreground md:text-xl">
+          <p className="max-w-175 text-muted-foreground md:text-xl">
             Discover a new way to learn with our modern, interactive learning
             management system. Access our high-quality courses anytime,
             anywhere.
