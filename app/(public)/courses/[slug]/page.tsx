@@ -1,8 +1,10 @@
+import Image from "next/image";
+import Link from "next/link";
+
 import { getIndividualCourse } from "@/app/data/course/get-course";
 import { checkIfCourseBought } from "@/app/data/user/user-is-enrolled";
 import { RenderDescription } from "@/components/rich-text-editor/RenderDescription";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Collapsible,
@@ -20,8 +22,7 @@ import {
   IconPlayerPlay,
 } from "@tabler/icons-react";
 import { CheckIcon } from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
+import { EnrollmentButton } from "./_components/EnrollmentButton";
 
 type Params = Promise<{ slug: string }>;
 
@@ -275,7 +276,7 @@ export default async function SlugPage({ params }: { params: Params }) {
                 {isEnrolled ? (
                   <Link href="/dashboard">Watch Course</Link>
                 ) : (
-                  <Button className="w-full">Enroll Now</Button>
+                  <EnrollmentButton courseId={course.id} />
                 )}
                 <p className="mt-3 text-center text-sm text-muted-foreground">
                   30-day money-back guarantee.
