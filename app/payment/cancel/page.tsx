@@ -16,8 +16,8 @@ export default function PaymentCancelPage() {
             <div className="mt-3 text-center sm:mt-5 w-full">
               <h2 className="text-xl font-semibold">Payment Cancelled</h2>
               <p className="text-sm mt-2 text-muted-foreground text-balance">
-                Your payment process has been cancelled. If this was a mistake,
-                please try again.
+                Your payment was cancelled. If you have any questions, please
+                contact our support team.
               </p>
 
               <Link
@@ -25,7 +25,7 @@ export default function PaymentCancelPage() {
                 className={buttonVariants({ className: "w-full mt-5" })}
               >
                 <ArrowLeft className="size-4" />
-                Go back to Home
+                Back to Home
               </Link>
             </div>
           </CardContent>
