@@ -46,6 +46,7 @@ export async function enrollInCourseAction(
         title: true,
         price: true,
         slug: true,
+        stripePriceId: true,
       },
     });
 
@@ -115,7 +116,7 @@ export async function enrollInCourseAction(
           },
           data: {
             amount: course.price,
-            status: "Pending",
+            status: "Active",
             updatedAt: new Date(),
           },
         });
@@ -135,7 +136,7 @@ export async function enrollInCourseAction(
         customer: stripeCustomerId,
         line_items: [
           {
-            price: "price_1StHPe4CA04tB9L1aJ34GPjo",
+            price: course.stripePriceId,
             quantity: 1,
           },
         ],
