@@ -27,8 +27,9 @@ export default function PaymentSuccessPage() {
             <div className="mt-3 text-center sm:mt-5 w-full">
               <h2 className="text-xl font-semibold">Payment Successful</h2>
               <p className="text-sm mt-2 text-muted-foreground text-balance">
-                Your payment process has been completed successfully. Thank you
-                for your purchase! You can now access your content.
+                Thank you for your purchase! Your payment was successful. You
+                can now access your course materials. If you have any questions,
+                please contact our support team.
               </p>
 
               <Link
