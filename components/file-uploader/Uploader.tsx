@@ -47,6 +47,28 @@ export function Uploader({ onChange, value, fileTypeAccepted }: iAppProps) {
     objectUrl: value ? fileUrl : undefined,
   });
 
+  const resetUploadState = useCallback(() => {
+    setFileState((prev) => {
+      if (prev.objectUrl && !prev.objectUrl.startsWith("http")) {
+        URL.revokeObjectURL(prev.objectUrl);
+      }
+
+      return {
+        error: false,
+        file: null,
+        id: null,
+        progress: 0,
+        uploading: false,
+        key: null,
+        objectUrl: undefined,
+        fileType: fileTypeAccepted,
+        isDeleting: false,
+      };
+    });
+
+    onChange?.("");
+  }, [fileTypeAccepted, onChange]);
+
   const uploadFile = useCallback(
     async (file: File) => {
       setFileState((prev) => ({ ...prev, uploading: true, progress: 0 }));
@@ -64,6 +86,23 @@ export function Uploader({ onChange, value, fileTypeAccepted }: iAppProps) {
           }),
         });
 
+        const responseText = await presignedResponse.text();
+
+        if (
+          presignedResponse.url.includes("/not-admin") ||
+          responseText.includes("Access Restricted")
+        ) {
+          toast.error(
+            "Thumbnail upload requires an admin account. Please sign in as an admin and try again.",
+          );
+          setFileState((prev) => ({
+            ...prev,
+            uploading: false, // Fix: set uploading to false on error
+            error: true,
+          }));
+          return;
+        }
+
         if (!presignedResponse.ok) {
           toast.error("Failed to get presigned URL");
           setFileState((prev) => ({
@@ -74,7 +113,10 @@ export function Uploader({ onChange, value, fileTypeAccepted }: iAppProps) {
           return;
         }
 
-        const { presignedUrl, key } = await presignedResponse.json();
+        const { presignedUrl, key } = JSON.parse(responseText) as {
+          presignedUrl: string;
+          key: string;
+        };
 
         // 2. Upload DIRECTLY to Tigris/S3 (Bypassing Next.js Server)
         await new Promise<void>((resolve, reject) => {
@@ -226,34 +268,6 @@ export function Uploader({ onChange, value, fileTypeAccepted }: iAppProps) {
     }
   }
 
-  function renderContent() {
-    if (fileState.uploading) {
-      return (
-        <RenderUploadingState
-          file={fileState.file as File}
-          progress={fileState.progress}
-        />
-      );
-    }
-
-    if (fileState.error) {
-      return <RenderErrorState />;
-    }
-
-    if (fileState.objectUrl) {
-      return (
-        <RenderUploadState
-          handleRemoveFile={handleRemoveFile}
-          isDeleting={fileState.isDeleting as boolean}
-          previewUrl={fileState.objectUrl}
-          fileType={fileState.fileType}
-        />
-      );
-    }
-
-    return <RenderEmptyState isDragActive={false} />;
-  }
-
   useEffect(() => {
     return () => {
       if (fileState.objectUrl && !fileState.objectUrl.startsWith("http")) {
@@ -286,7 +300,23 @@ export function Uploader({ onChange, value, fileTypeAccepted }: iAppProps) {
     >
       <CardContent>
         <input {...getInputProps()} />
-        {renderContent()}
+        {fileState.error ? (
+          <RenderErrorState onRetry={resetUploadState} />
+        ) : fileState.uploading ? (
+          <RenderUploadingState
+            file={fileState.file as File}
+            progress={fileState.progress}
+          />
+        ) : fileState.objectUrl ? (
+          <RenderUploadState
+            handleRemoveFile={handleRemoveFile}
+            isDeleting={fileState.isDeleting as boolean}
+            previewUrl={fileState.objectUrl}
+            fileType={fileState.fileType}
+          />
+        ) : (
+          <RenderEmptyState isDragActive={isDragActive} />
+        )}
       </CardContent>
     </Card>
   );
