@@ -30,7 +30,7 @@ export async function POST(req: Request) {
     const customerId = session.customer as string;
 
     if (!courseId) {
-      throw new Error("Course ID is missing in metadata");
+      throw new Error("Course ID is missing in session metadata");
     }
 
     const user = await prisma.user.findUnique({
@@ -40,7 +40,7 @@ export async function POST(req: Request) {
     });
 
     if (!user) {
-      throw new Error("User not found for the given customer ID");
+      throw new Error("User not found for the given Stripe customer ID");
     }
 
     await prisma.enrollment.update({
