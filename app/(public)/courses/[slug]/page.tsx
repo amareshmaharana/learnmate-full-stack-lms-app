@@ -23,6 +23,7 @@ import {
 } from "@tabler/icons-react";
 import { CheckIcon } from "lucide-react";
 import { EnrollmentButton } from "./_components/EnrollmentButton";
+import { buttonVariants } from "@/components/ui/button";
 
 type Params = Promise<{ slug: string }>;
 
@@ -247,7 +248,7 @@ export default async function SlugPage({ params }: { params: Params }) {
                 </div>
 
                 <div className="mb-6 space-y-3">
-                  <h4>This course includes:</h4>
+                  <h4>What you&apos;ll get:</h4>
 
                   <ul className="space-y-2">
                     <li className="flex items-center gap-2 text-sm">
@@ -274,12 +275,17 @@ export default async function SlugPage({ params }: { params: Params }) {
                 </div>
 
                 {isEnrolled ? (
-                  <Link href="/dashboard">Watch Course</Link>
+                  <Link
+                    href="/dashboard"
+                    className={buttonVariants({ className: "w-full" })}
+                  >
+                    Watch Course
+                  </Link>
                 ) : (
                   <EnrollmentButton courseId={course.id} />
                 )}
                 <p className="mt-3 text-center text-sm text-muted-foreground">
-                  30-day money-back guarantee.
+                  30-day money-back guarantee. No questions asked.
                 </p>
               </CardContent>
             </Card>
