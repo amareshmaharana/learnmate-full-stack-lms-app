@@ -15,10 +15,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { authClient } from "@/lib/auth-client";
-import { useRouter } from "next/navigation";
 
 export function LoginForm() {
-  const router = useRouter();
   const [githubPending, startGithubTransition] = useTransition();
   const [emailPending, startEmailTransition] = useTransition();
   const [email, setEmail] = useState("");
@@ -42,21 +40,35 @@ export function LoginForm() {
 
   function signInWithEmail() {
     startEmailTransition(async () => {
-      await authClient.emailOtp.sendVerificationOtp({
-        email: email,
-        type: "sign-in",
-        fetchOptions: {
-          onSuccess: () => {
-            toast.success(
-              "Verification OTP sent to your email. Please check your inbox."
-            );
-            router.push(`/verify-request?email=${encodeURIComponent(email)}`);
-          },
-          onError: () => {
-            toast.error("Failed to send OTP. Please try again.");
-          },
-        },
-      });
+      const normalizedEmail = email.trim().toLowerCase();
+
+      if (!normalizedEmail) {
+        toast.error("Please enter an email address.");
+        return;
+      }
+
+      try {
+        const response = await authClient.emailOtp.sendVerificationOtp({
+          email: normalizedEmail,
+          type: "sign-in",
+        });
+
+        if (response.error) {
+          toast.error(
+            response.error.message ?? "Failed to send OTP. Please try again.",
+          );
+          return;
+        }
+
+        toast.success(
+          "Verification OTP sent to your email. Please check your inbox.",
+        );
+        window.location.assign(
+          `/verify-request?email=${encodeURIComponent(normalizedEmail)}`,
+        );
+      } catch {
+        toast.error("Failed to send OTP. Please try again.");
+      }
     });
   }
 
@@ -72,6 +84,7 @@ export function LoginForm() {
 
         <CardContent className="flex flex-col gap-4">
           <Button
+            type="button"
             disabled={githubPending}
             onClick={signInWithGitHub}
             className="w-full cursor-pointer"
@@ -109,6 +122,7 @@ export function LoginForm() {
             </div>
 
             <Button
+              type="button"
               className="w-full mt-4 cursor-pointer"
               onClick={signInWithEmail}
               disabled={emailPending}
@@ -116,7 +130,7 @@ export function LoginForm() {
               {emailPending ? (
                 <>
                   <Loader2 className="size-4 animate-spin" />
-                  <span>Loading...</span>
+                  <span>Signing in...</span>
                 </>
               ) : (
                 <>
