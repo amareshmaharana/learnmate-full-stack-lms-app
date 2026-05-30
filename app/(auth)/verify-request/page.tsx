@@ -16,12 +16,11 @@ import {
 } from "@/components/ui/input-otp";
 import { authClient } from "@/lib/auth-client";
 import { Loader2 } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 
 export default function VerifyRequest() {
-  const router = useRouter();
   const [otp, setOtp] = useState("");
   const [emailPending, startTransition] = useTransition();
   const params = useSearchParams();
@@ -30,19 +29,30 @@ export default function VerifyRequest() {
 
   function verifyOtp() {
     startTransition(async () => {
-      await authClient.signIn.emailOtp({
-        email: email,
-        otp: otp,
-        fetchOptions: {
-          onSuccess: () => {
-            toast.success("Email verified successfully!!");
-            router.push("/");
-          },
-          onError: () => {
-            toast.error("Invalid OTP. Please try again.");
-          },
-        },
-      });
+      const normalizedEmail = email?.trim().toLowerCase();
+
+      if (!normalizedEmail) {
+        toast.error("Missing email address. Please start login again.");
+        window.location.assign("/login");
+        return;
+      }
+
+      try {
+        const response = await authClient.signIn.emailOtp({
+          email: normalizedEmail,
+          otp,
+        });
+
+        if (response.error) {
+          toast.error("Invalid OTP. Please try again.");
+          return;
+        }
+
+        toast.success("Email verified successfully!!");
+        window.location.assign("/");
+      } catch {
+        toast.error("Invalid OTP. Please try again.");
+      }
     });
   }
 
@@ -85,6 +95,7 @@ export default function VerifyRequest() {
         </div>
 
         <Button
+          type="button"
           className="w-full cursor-pointer"
           disabled={emailPending || !isOtpCompleted}
           onClick={verifyOtp}
