@@ -43,7 +43,7 @@ export function NavUser() {
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size="lg"
-              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+              className="h-auto min-h-14 data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <Avatar className="h-8 w-8 rounded-lg">
                 <AvatarImage
@@ -59,7 +59,7 @@ export function NavUser() {
                     : session?.user.email.charAt(0).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
-              <div className="grid flex-1 text-left text-sm leading-tight">
+              <div className="grid flex-1 min-w-0 text-left text-sm leading-tight">
                 <span className="truncate font-medium">
                   {session?.user.name && session.user.name.length > 0
                     ? session.user.name
@@ -95,7 +95,7 @@ export function NavUser() {
                       : session?.user.email.charAt(0).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
-                <div className="grid flex-1 text-left text-sm leading-tight">
+                <div className="grid flex-1 min-w-0 text-left text-sm leading-tight">
                   <span className="truncate font-medium">
                     {session?.user.name}
                   </span>
