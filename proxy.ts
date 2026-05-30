@@ -36,7 +36,9 @@ export async function proxy(request: NextRequest) {
 export const config = {
   // Exclude static, image, favicon, auth API and the login page itself
   // to avoid middleware redirect loops when the app redirects to /login.
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|api/auth|login).*)"],
+  matcher: [
+    "/((?!_next/static|_next/image|favicon.ico|api/auth|login|verify-request).*)",
+  ],
 };
 
 export default createMiddleware(aj, async (request: NextRequest) => {
