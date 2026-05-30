@@ -126,7 +126,7 @@ export async function enrollInCourseAction(
             userId: user.id,
             courseId: course.id,
             amount: course.price,
-            status: "Pending",
+            status: "Active",
           },
         });
       }
