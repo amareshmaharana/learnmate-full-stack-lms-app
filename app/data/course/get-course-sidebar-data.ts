@@ -32,6 +32,16 @@ export async function getCourseSidebarData(slug: string) {
               title: true,
               position: true,
               description: true,
+              lessonProgress: {
+                where: {
+                  userId: session.id,
+                },
+                select: {
+                  completed: true,
+                  lessonId: true,
+                  id: true,
+                },
+              },
             },
           },
         },
@@ -61,4 +71,6 @@ export async function getCourseSidebarData(slug: string) {
   };
 }
 
-export type CourseSidebarDataType = Awaited<ReturnType<typeof getCourseSidebarData>>;
+export type CourseSidebarDataType = Awaited<
+  ReturnType<typeof getCourseSidebarData>
+>;
