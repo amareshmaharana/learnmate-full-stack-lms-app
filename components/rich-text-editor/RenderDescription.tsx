@@ -18,7 +18,7 @@ export function RenderDescription({ json }: { json: JSONContent }) {
   }, [json]);
 
   return (
-    <div className="prose dark:prose-invert prose-li:marker:text-primary">
+    <div className="prose w-full max-w-none dark:prose-invert prose-li:marker:text-primary prose-p:max-w-none prose-li:max-w-none">
       {parse(output)}
     </div>
   );
