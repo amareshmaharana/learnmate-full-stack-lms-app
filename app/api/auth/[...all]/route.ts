@@ -3,6 +3,7 @@ import ip from "@arcjet/ip";
 import  {
   type ArcjetDecision,
   type BotOptions,
+  type ArcjetEmailType,
   type EmailOptions,
   type ProtectSignupOptions,
   type SlidingWindowRateLimitOptions,
@@ -17,11 +18,10 @@ import arcjet from "@/lib/arcjet";
 
 // The arcjet instance is created outside of the handler
 
-const emailOptions = {
+const emailOptions: EmailOptions = {
   mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
-  // Block emails that are disposable, invalid, or have no MX records
-  block: ["DISPOSABLE", "INVALID", "NO_MX_RECORDS"],
-} satisfies EmailOptions;
+  deny: ["DISPOSABLE", "INVALID", "NO_MX_RECORDS"] as ArcjetEmailType[],
+};
 
 const botOptions = {
   mode: "LIVE",
