@@ -112,7 +112,7 @@ export function DashboardAppSidebar({ ...props }: React.ComponentProps<typeof Si
               asChild
               className="data-[slot=sidebar-menu-button]:p-1.5!"
             >
-              <Link href="/admin">
+              <Link href="/">
                 <Image src={Logo} alt="" className="size-7" />
                 <span className="text-xl font-semibold">
                   LearnMate.
