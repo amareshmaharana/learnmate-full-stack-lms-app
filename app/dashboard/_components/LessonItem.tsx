@@ -12,11 +12,10 @@ interface iAppProps {
   };
   slug: string;
   isActive?: boolean;
+  completed?: boolean;
 }
 
-const LessonItem = ({ lesson, slug, isActive }: iAppProps) => {
-  const completed = false;
-
+const LessonItem = ({ lesson, slug, isActive, completed }: iAppProps) => {
   return (
     <Link
       href={`/dashboard/${slug}/${lesson.id}`}
