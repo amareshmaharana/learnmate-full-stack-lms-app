@@ -1,11 +1,31 @@
-export default function CourseSlugRoute() {
+import { getCourseSidebarData } from "@/app/data/course/get-course-sidebar-data";
+
+import { redirect } from "next/navigation";
+
+interface iAppProps {
+  params: Promise<{ slug: string }>;
+}
+
+export default async function CourseSlugRoute({ params }: iAppProps) {
+  const { slug } = await params;
+
+  const course = await getCourseSidebarData(slug);
+
+  const firstChapter = course.course.chapter[0];
+  const firstLesson = firstChapter?.lessons[0];
+
+  if (firstLesson) {
+    redirect(`/dashboard/${slug}/${firstLesson.id}`);
+  }
+
   return (
     <>
-      <h1 className="text-3xl font-bold">Course Details</h1>
-      <p className="text-muted-foreground">
-        This is the course details page. Here you can view the course content
-        and start learning!
-      </p>
+      <div className="flex items-center justify-center h-full text-center">
+        <h2 className="text-2xl font-bold mb-2">No Lessons Available</h2>
+        <p className="text-muted-foreground">
+          There are no lessons available for this course at the moment. Please check back later.
+        </p>
+      </div>
     </>
   );
 }
