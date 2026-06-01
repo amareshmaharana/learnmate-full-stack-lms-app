@@ -21,6 +21,11 @@ const aj = arcjet({
 });
 
 export async function proxy(request: NextRequest) {
+  // Keep public pages public. Only protect admin area with auth redirect.
+  if (!request.nextUrl.pathname.startsWith("/admin")) {
+    return NextResponse.next();
+  }
+
   const sessionCookie = getSessionCookie(request);
 
   // THIS IS NOT SECURE!
@@ -42,6 +47,10 @@ export const config = {
 };
 
 export default createMiddleware(aj, async (request: NextRequest) => {
+  // Allow root to remain public — do not force auth redirect on opening the site
+  if (request.nextUrl.pathname === "/") {
+    return NextResponse.next();
+  }
   if (request.nextUrl.pathname.startsWith("/admin")) {
     return proxy(request);
   }
