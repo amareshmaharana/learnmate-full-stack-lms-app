@@ -6,6 +6,9 @@ import { S3 } from "@/lib/S3Client";
 import arcjet, { fixedWindow } from "@/lib/arcjet";
 import { requireAdmin } from "@/app/data/admin/require-admin";
 
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
 const aj = arcjet
   .withRule(
     fixedWindow({
